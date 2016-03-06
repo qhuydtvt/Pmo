@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Main color -->
+    <color name="colorPrimary">#4CAF50</color>
+    <color name="colorPrimaryDark">#388E3C</color>
+    <color name="colorAccent">#FF5722</color>
+    <color name="primary_text">#212121</color>
+    <color name="white_text">#FFFFFF</color>
+    <color name="secondary_text">#727272</color>
+    <color name="icons">#FFFFFF</color>
+    <color name="divider">#B6B6B6</color>
+    <!-- Drawer Menu -->
+    <color name="background_menu_drawer">#B6B6B6</color>
+    <!-- Screen Timer -->
+    <color name="text_progress">#ff4200</color>
+    <color name="text_breaking_time">#ffffff</color>
+
+    <color name="timer_in_progress">#8cc63f</color>
+
+    <!-- Timer View - In progress -->
+    <color name="timer_main_circle_inprogress">#8cc63f</color>
+    <color name="timer_border_circle_inprogress">#ffffff</color>
+    <!-- Timer View - Breaking time -->
+    <color name="timer_main_circle_breaking_time">#c3ddc4</color>
+    <color name="timer_border_circle_breaking_time">#f5ee30</color>
+
+</resources>

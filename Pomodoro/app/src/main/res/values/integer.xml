@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <integer-array name="setting_working_time">
+        <item>25</item>
+        <item>30</item>
+        <item>40</item>
+        <item>45</item>
+        <item>50</item>
+    </integer-array>
+    
+    <integer-array name="setting_short_break">
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+    </integer-array>
+
+    <integer-array name="setting_long_break">
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+    </integer-array>
+
+    <integer-array name="setting_long_break_after">
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </integer-array>
+</resources>

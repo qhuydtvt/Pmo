@@ -1,0 +1,256 @@
+package vn.edu.techkids.pomodoro.databases;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+
+import vn.edu.techkids.pomodoro.entity.Task;
+import vn.edu.techkids.pomodoro.entity.TaskRecord;
+import vn.edu.techkids.pomodoro.utils.Logger;
+import vn.edu.techkids.pomodoro.utils.TaskColor;
+import vn.edu.techkids.pomodoro.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by qhuydtvt on 12/5/2015.
+ */
+public class PomodoroDbHelper extends SQLiteOpenHelper {
+
+    /* =================================== CONSTANTS ============================================ */
+    private static final int DB_VERSION = 1;
+    private static final String DB_NAME = "pomodoro.db";
+    private static final boolean DB_DUMMY = true;
+
+    /* =================================== CONTEXT ============================================ */
+    private Context mContext;
+
+    /* =================================== CONSTRUCTORS ===========================================*/
+    public PomodoroDbHelper(Context context) {
+        super(context, DB_NAME, null, DB_VERSION);
+        mContext = context;
+        this.getWritableDatabase();
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        updatePomodoroDatabse(db, 0, DB_VERSION);
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        updatePomodoroDatabse(db, oldVersion, newVersion);
+    }
+
+    private void updatePomodoroDatabse(SQLiteDatabase db, int oldVersion, int newVersion) {
+        if (oldVersion < 1) {
+            Logger.d("updatePomodoroDatabse", Task.SQL_CREATE_TABLE);
+            db.execSQL(Task.SQL_CREATE_TABLE);
+            db.execSQL(TaskRecord.SQL_CREATE_TABLE);
+            if (DB_DUMMY) {
+                insertDummyData(db);
+            }
+        } else {
+            /* Reversed for furture use */
+        }
+    }
+
+    public void insertTask(Task task) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        insertTask(sqLiteDatabase, task);
+    }
+
+    public void updateTask(Task task) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        updateTask(sqLiteDatabase, task);
+    }
+
+    public void deleteTask(Task task) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        deleteTask(sqLiteDatabase, task);
+    }
+
+    private void insertTask(SQLiteDatabase sqLiteDatabase, Task task) {
+        long taskId = sqLiteDatabase.insert(Task.TABLE_NAME, null, task.getContentValues());
+        task.setId(taskId);
+    }
+
+    private void updateTask(SQLiteDatabase sqLiteDatabase, Task task) {
+        sqLiteDatabase.update(Task.TABLE_NAME, task.getContentValues(),
+                String.format("%s = ?", Task.COLUMN_ID),
+                new String[]{String.valueOf(task.getId())});
+    }
+
+    private void deleteTask(SQLiteDatabase sqLiteDatabase, Task task) {
+        sqLiteDatabase.delete(Task.TABLE_NAME,
+                String.format("%s = ?", Task.COLUMN_ID),
+                new String[]{String.valueOf(task.getId())});
+    }
+
+    public List<Task> selectAllTasks() {
+        ArrayList<Task> taskArrayList = new ArrayList<>();
+        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        Cursor cursor = sqLiteDatabase.query(Task.TABLE_NAME,
+                Task.COLUMN_NAMES, null, null, null, null, null);
+        while (cursor.moveToNext()) {
+            Task task = new Task(cursor);
+            taskArrayList.add(task);
+        }
+
+        cursor.close();
+
+        return taskArrayList;
+    }
+
+    /**
+     * Insert new TaskRecord
+     * @param taskRecord data to insert
+     */
+    public void insertTaskRecord(TaskRecord taskRecord) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        insertTaskRecord(db, taskRecord);
+    }
+
+    private void insertTaskRecord(SQLiteDatabase db, TaskRecord taskRecord) {
+        long taskRecordId = db.insert(TaskRecord.TABLE_NAME, null, taskRecord.getContentValues());
+        taskRecord.setId(taskRecordId);
+        if (taskRecordId <= 0) {
+            Logger.w("insertTaskRecord", "Insert task record failed. TaskRecordId = " + taskRecord.getTaskId());
+        } else {
+            Logger.i("insertTaskRecord", "Insert task record success. TaskRecordId = " + taskRecord.getTaskId());
+        }
+    }
+
+    /**
+     * Insert new list of TaskRecord
+     * @param taskRecord
+     *//*
+    public void insertTaskRecords(SQLiteDatabase db, TaskRecord[] taskRecord) {
+        ContentValues values = new ContentValues();
+
+        for (TaskRecord record : taskRecord) {
+            values.put(TaskRecord.COLUMN_TASK_ID, record.getTaskId());
+            values.put(TaskRecord.COLUMN_RECORD_TIME, record.getRecordTime());
+            values.put(TaskRecord.COLUMN_WORK_DURATION, record.getWorkDuration());
+
+            long count = db.insert(TaskRecord.TABLE_NAME, null, values);
+            if (count <= 0) {
+                Logger.w("insertTaskRecord", "Insert task record failed. TaskId = " + record.getTaskId());
+            } else {
+                Logger.i("insertTaskRecord", "Insert task record success. TaskId = " + record.getTaskId());
+            }
+        }
+
+//        if (db != null && db.isOpen()) {
+//            db.close();
+//        }
+    }*/
+
+    /**
+     * Get all task records
+     * @return
+     */
+    public List<TaskRecord> getAllTaskRecords() {
+        ArrayList<TaskRecord> taskArrayList = new ArrayList<>();
+        SQLiteDatabase sqliteDatabase = this.getReadableDatabase();
+
+        String orderByClause = String.format("%s ASC", TaskRecord.COLUMN_RECORD_TIME);
+
+        Cursor cursor = sqliteDatabase.query(TaskRecord.TABLE_NAME,
+                TaskRecord.COLUMN_NAMES, null, null, null, null,
+                orderByClause);
+
+        while (cursor.moveToNext()) {
+            TaskRecord task = new TaskRecord(cursor);
+            taskArrayList.add(task);
+        }
+        if (cursor != null && !cursor.isClosed()) {
+            cursor.close();
+        }
+        Logger.d("getAllTaskRecords", "Count = " + taskArrayList.size());
+        return taskArrayList;
+    }
+
+    /**
+     * Get all task in period of time
+     * @param fromDate
+     * @param toDate
+     * @return
+     */
+    public List<TaskRecord> getAllTaskRecords(String fromDate, String toDate) {
+        ArrayList<TaskRecord> taskArrayList = new ArrayList<TaskRecord>();
+        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+
+        if (fromDate.length() == 10) {
+            fromDate = fromDate + " 00:00";
+        }
+        if (toDate.length() == 10) {
+            toDate = toDate + " 00:00";
+        }
+
+        String whereClause = String.format("%s BETWEEN \'%s\' AND \'%s\'",
+                TaskRecord.COLUMN_RECORD_TIME,
+                fromDate,
+                toDate);
+
+        String orderByClause = String.format("%s ASC", TaskRecord.COLUMN_RECORD_TIME);
+
+       /*TaskRecord.COLUMN_RECORD_TIME + ">= " + Utils.getMillisFromDate(fromDate) + " AND "+
+                       TaskRecord.COLUMN_RECORD_TIME + "<= " + Utils.getMillisFromDate(toDate);*/
+
+        Logger.d("getAllTaskRecords", "where = " + whereClause);
+
+        Cursor cursor = sqLiteDatabase.query(TaskRecord.TABLE_NAME,
+                TaskRecord.COLUMN_NAMES,
+                whereClause, null, null, null, orderByClause);
+
+        while (cursor.moveToNext()) {
+            TaskRecord task = new TaskRecord(cursor);
+            taskArrayList.add(task);
+        }
+
+        if (cursor != null && !cursor.isClosed()) {
+            cursor.close();
+        }
+
+        Logger.d("getAllTaskRecords", "Count = " + taskArrayList.size());
+        return taskArrayList;
+    }
+
+    private void insertDummyData(SQLiteDatabase db) {
+        final Task[] tasks = new Task[] {
+                new Task("Create design", 5.5f, TaskColor.VALUE_INDIGO),
+                new Task("Investigate view 2", 10, TaskColor.VALUE_DEEP_PURPLE),
+                new Task("Create icons", 10.0f, TaskColor.VALUE_LIGHT_GREEN),
+                new Task("Create screen view 2", 10.0f, TaskColor.VALUE_RED)
+        };
+
+        for (Task task : tasks) {
+            insertTask(db, task);
+        }
+
+        final TaskRecord[] taskRecords = new TaskRecord[] {
+                new TaskRecord(1, 1, Utils.getDatetimeString(2015, 12, 6, 6, 30), 25),
+                new TaskRecord(4, 2, Utils.getDatetimeString(2015, 12, 6, 6, 30), 25),
+                new TaskRecord(2, 2, Utils.getDatetimeString(2015, 6, 6, 9, 30), 25),
+                new TaskRecord(3, 3, Utils.getDatetimeString(2015, 9, 6, 13, 30), 25),
+                new TaskRecord(7, 1, Utils.getDatetimeString(2015, 12, 29, 9, 30), 25),
+                new TaskRecord(5, 3, Utils.getDatetimeString(2015, 12, 15, 9, 30), 25),
+                new TaskRecord(6, 1, Utils.getDatetimeString(2015, 12, 14, 9, 30), 25),
+                new TaskRecord(6, 1, Utils.getDatetimeString(2015, 11, 30, 9, 30), 25),
+                new TaskRecord(6, 1, Utils.getDatetimeString(2015, 7, 9, 10, 30), 25),
+                new TaskRecord(10, 2, Utils.getDatetimeString(2015, 7, 23, 14, 30), 25),
+                new TaskRecord(11, 3, Utils.getDatetimeString(2015, 7, 9, 19, 30), 25),
+                new TaskRecord(12, 3, Utils.getDatetimeString(2015, 8, 26, 15, 00), 25),
+                new TaskRecord(13, 2, Utils.getDatetimeString(2015, 7, 26, 17, 00), 25),
+                new TaskRecord(14, 1, Utils.getDatetimeString(2015, 7, 24, 10, 15), 25),
+        };
+        for(TaskRecord taskRecord : taskRecords) {
+            insertTaskRecord(db, taskRecord);
+        }
+    }
+}

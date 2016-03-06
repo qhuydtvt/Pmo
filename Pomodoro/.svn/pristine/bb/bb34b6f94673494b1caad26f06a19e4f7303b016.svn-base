@@ -1,0 +1,279 @@
+package vn.edu.techkids.pomodoro.fragments;
+
+import android.app.DatePickerDialog;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.DatePicker;
+import android.widget.Spinner;
+import android.widget.TextView;
+
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.ChartData;
+import com.github.mikephil.charting.listener.ChartTouchListener;
+import com.github.mikephil.charting.listener.OnChartGestureListener;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import vn.edu.techkids.pomodoro.R;
+import vn.edu.techkids.pomodoro.adapter.AdapterSpinnerTimePeriod;
+import vn.edu.techkids.pomodoro.entity.TaskRecord;
+import vn.edu.techkids.pomodoro.entity.TimePeriod;
+import vn.edu.techkids.pomodoro.utils.Logger;
+import vn.edu.techkids.pomodoro.utils.Utils;
+
+
+/**
+ * Created by TienVV on 12/19/15.
+ */
+public class FragmentTaskSummrary extends BaseFragment implements View.OnClickListener, AdapterView.OnItemSelectedListener, OnChartGestureListener {
+
+    // Context
+    private AdapterSpinnerTimePeriod mAdapterSpinnerTimePeriod;
+    // Layout
+    private View mView;
+    private Spinner mSpTime;
+    private TextView mTvTimeFrom;
+    private TextView mTvTimeTo;
+    private BarChart mChart;
+
+    private DatePickerDialog mDatePickerDialogFrom;
+    private DatePickerDialog mDatePickerDialogTo;
+    private DatePickerDialog.OnDateSetListener mOnDateFromSetListener = new DatePickerDialog.OnDateSetListener() {
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            Logger.d("onDateFromSet", "year = " + year + ", month = " + (monthOfYear + 1) + ", day = " + dayOfMonth);
+            mTvTimeFrom.setText(Utils.getDateString(year, monthOfYear + 1, dayOfMonth));
+            int index = mAdapterSpinnerTimePeriod.getIndex(TimePeriod.ID_CUSTOM);
+            mSpTime.setSelection(index, true);
+        }
+    };
+
+    private DatePickerDialog.OnDateSetListener mOnDateToSetListener = new DatePickerDialog.OnDateSetListener() {
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            Logger.d("onDateToSet", "year = " + year + ", month = " + (monthOfYear + 1) + ", day = " + dayOfMonth);
+            mTvTimeTo.setText(Utils.getDateString(year, monthOfYear + 1, dayOfMonth));
+            int index = mAdapterSpinnerTimePeriod.getIndex(TimePeriod.ID_CUSTOM);
+            mSpTime.setSelection(index, true);
+        }
+    };
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Initiate context
+        initContext();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mView = inflater.inflate(R.layout.fragment_task_summary, container, false);
+        // Initiate layout
+        initLayout();
+        return mView;
+    }
+
+    /**
+     * Initiate context
+     */
+    private void initContext() {
+        mAdapterSpinnerTimePeriod = new AdapterSpinnerTimePeriod(getActivity());
+    }
+
+    /**
+     * Initiate layout
+     */
+    private void initLayout() {
+        mSpTime = (Spinner) mView.findViewById(R.id.sp_time);
+        mSpTime.setOnItemSelectedListener(this);
+        mSpTime.setAdapter(mAdapterSpinnerTimePeriod);
+
+        mTvTimeFrom = (TextView) mView.findViewById(R.id.tv_from);
+        mTvTimeFrom.setOnClickListener(this);
+
+        mTvTimeTo = (TextView) mView.findViewById(R.id.tv_to);
+        mTvTimeTo.setOnClickListener(this);
+
+        mChart = (BarChart) mView.findViewById(R.id.chart);
+        mChart.setOnChartGestureListener(this);
+        mChart.setScaleXEnabled(true);
+        mChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        mChart.getAxisRight().setEnabled(false);
+        mChart.setVisibleXRangeMaximum(6);
+        mChart.setDrawGridBackground(false);
+
+        mFloatingActionButton.hide();
+    }
+
+    /**
+     * Generare chart by list TaskRecord
+     * @param taskRecords
+     */
+    private void generateBarData(List<TaskRecord> taskRecords) {
+        if (taskRecords == null || taskRecords.size() == 0) {
+            mChart.setData(null);
+            mChart.clearValues();
+            mChart.setDescription(null);
+            mChart.notifyDataSetChanged();
+            mChart.invalidate();
+            return;
+        }
+        ArrayList<BarEntry> entries = new ArrayList<BarEntry>();
+
+        String dateTemp = "";
+        int count = 0;
+        int index = -1;
+        BarEntry entry = null;
+        List<String> listLable = new ArrayList<String>();
+        for (TaskRecord taskRecord : taskRecords) {
+            String date = taskRecord.getRecordTime();
+            if (dateTemp.equals(date)) {
+                count++;
+                entry.setVal(count);
+            } else {
+                dateTemp = date;
+                count = 1;
+                index++;
+                listLable.add(date.substring(0, 5));
+                Logger.d("generateBarData", "Add date = " + date);
+                entry = new BarEntry(count, index);
+                entries.add(entry);
+            }
+        }
+
+        BarDataSet set = new BarDataSet(entries, "Pomodoro");
+        BarData result = new BarData(listLable, set);
+
+        mChart.setDescription(taskRecords.size() + " " + getString(R.string.tv_pomodoros));
+        mChart.setDescriptionColor(getResources().getColor(R.color.colorAccent));
+        mChart.setData(result);
+        mChart.setVisibleXRangeMaximum(6);
+        mChart.notifyDataSetChanged();
+        mChart.invalidate();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.tv_from:
+                String dateFrom = mTvTimeFrom.getText().toString();
+                mDatePickerDialogFrom = new DatePickerDialog(getActivity(), mOnDateFromSetListener,
+                        Utils.getYearFromString(dateFrom),
+                        Utils.getMonthFromString(dateFrom) - 1,
+                        Utils.getDayFromString(dateFrom));
+                mDatePickerDialogFrom.show();
+                break;
+            case R.id.tv_to:
+                String dateTo = mTvTimeTo.getText().toString();
+                mDatePickerDialogTo = new DatePickerDialog(getActivity(), mOnDateToSetListener,
+                        Utils.getYearFromString(dateTo),
+                        Utils.getMonthFromString(dateTo) - 1,
+                        Utils.getDayFromString(dateTo));
+                mDatePickerDialogTo.show();
+                break;
+        }
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        switch (parent.getId()) {
+            case  R.id.sp_time:
+                selectedTimePeriod(position);
+                break;
+        }
+    }
+
+    /**
+     * Selected time period item
+     * @param position
+     */
+    private void selectedTimePeriod(int position) {
+        TimePeriod timePeriod = (TimePeriod) mAdapterSpinnerTimePeriod.getItem(position);
+        Logger.d("selectedTimePeriod", "Selected: " + getString(timePeriod.getTitleRes()));
+        String fromDate = null;
+        String toDate = null;
+        switch (timePeriod.getId()) {
+            case TimePeriod.ID_THIS_WEEK:
+                fromDate = Utils.getFirstDayOfWeek();
+                toDate = Utils.getLastDayOfWeek();
+                break;
+            case TimePeriod.ID_THIS_MONTH:
+                fromDate = Utils.getFirstDayOfMonth();
+                toDate = Utils.getLastDayOfMonth();
+                break;
+            case TimePeriod.ID_THIS_YEAR:
+                fromDate = Utils.getFirstDayOfYear();
+                toDate = Utils.getLastDayOfYear();
+                break;
+            case TimePeriod.ID_ALL:
+                fromDate = Utils.getFirstDayOfYear();
+                toDate = Utils.getLastDayOfYear();
+                break;
+            case TimePeriod.ID_CUSTOM:
+                fromDate = mTvTimeFrom.getText().toString();
+                toDate = mTvTimeTo.getText().toString();
+                break;
+        }
+
+        mTvTimeFrom.setText(fromDate);
+        mTvTimeTo.setText(toDate);
+
+        List<TaskRecord> taskRecords = mPoromodoDbHelper.getAllTaskRecords(fromDate, toDate);
+        generateBarData(taskRecords);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+    @Override
+    public void onChartGestureStart(MotionEvent motionEvent, ChartTouchListener.ChartGesture chartGesture) {
+
+    }
+
+    @Override
+    public void onChartGestureEnd(MotionEvent motionEvent, ChartTouchListener.ChartGesture chartGesture) {
+
+    }
+
+    @Override
+    public void onChartLongPressed(MotionEvent motionEvent) {
+
+    }
+
+    @Override
+    public void onChartDoubleTapped(MotionEvent motionEvent) {
+
+    }
+
+    @Override
+    public void onChartSingleTapped(MotionEvent motionEvent) {
+
+    }
+
+    @Override
+    public void onChartFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+
+    }
+
+    @Override
+    public void onChartScale(MotionEvent motionEvent, float v, float v1) {
+
+    }
+
+    @Override
+    public void onChartTranslate(MotionEvent motionEvent, float v, float v1) {
+
+    }
+}

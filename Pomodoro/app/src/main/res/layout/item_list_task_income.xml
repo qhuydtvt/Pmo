@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="@dimen/dimen_12"
+    android:paddingBottom="@dimen/dimen_12"
+    android:paddingLeft="@dimen/dimen_12"
+    android:paddingRight="@dimen/dimen_16"
+    android:orientation="horizontal">
+    <View
+        android:id="@+id/v_task_income_color"
+        android:layout_width="@dimen/dimen_8"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:background="@drawable/task_color"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="@dimen/dimen_8">
+        <TextView
+            android:id="@+id/tv_task_income_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="@color/primary_text"
+            android:textAllCaps="false"/>
+        <TextView
+            android:id="@+id/tv_task_income_total_work_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+    <View
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+    <TextView
+        android:id="@+id/tv_task_income_total_payment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:minWidth="@dimen/dimen_24"
+        android:layout_marginLeft="@dimen/dimen_24"/>
+</LinearLayout>

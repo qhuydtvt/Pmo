@@ -1,0 +1,104 @@
+<resources>
+    <string name="app_name">Pomodoro</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <!-- Drawer Menu Items -->
+    <string name="menu_list_task">List Task</string>
+    <string name="menu_timer">Timer</string>
+    <string name="menu_task_summary">Task Summary</string>
+    <string name="menu_income">Income</string>
+    <string name="menu_setting">Setting</string>
+    <string name="title_activity_task_list">Task list</string>
+
+    <string name="menu_item_edit_task">Edit</string>
+    <string name="menu_item_delete_task">Delete</string>
+
+    <string name="alert_delete_task_title">Delete Task</string>
+    <string name="alert_delete_task_confirm_msg">Do you want to delete this task?</string>
+    <string name="alert_delete_task_OK">OK</string>
+    <string name="alert_delete_task_Cancel">Cancel</string>
+
+    <string name="title_task_name">Name</string>
+    <string name="title_task_payment">Payment per hour</string>
+    <string name="title_task_color">Color</string>
+
+    <string name="toast_task_empty_name">Please enter task name</string>
+    <string name="toast_task_empty_payment">Please enter payment</string>
+    <string name="toast_task_add_done">Task created</string>
+    <string name="toast_task_edit_done">Task updated</string>
+
+    <string name="title_screen_task_list">Task list</string>
+    <string name="title_screen_edit_task">Edit task</string>
+    <string name="title_screen_add_task">Add task</string>
+    <string name="title_screen_timer">Timer</string>
+    <string name="title_screen_income">Income</string>
+    <string name="title_screen_settings">Setting</string>
+
+    <string name="alert_title_open_timer">Open Timer</string>
+    <string name="alert_message_open_timer">Do you want to record task \"%s\"?</string>
+    <string name="alert_open_timer_task_yes">Yes</string>
+    <string name="alert_open_timer_no">No</string>
+
+    <string-array name="task_list_menu_items">
+        <item>Edit</item>
+        <item>Delete</item>
+    </string-array>
+    
+    <!-- Screen Timer -->
+    <string name="timer_progress">In progress</string>
+    <string name="timer_paused">Paused</string>
+    <string name="timer_breaking_time">Breaking time</string>
+    <string name="periods">Periods %1$d/%2$d</string>
+    <!-- Screen Task Summary -->
+    <string name="tv_time">Time</string>
+    <string name="tv_from">From</string>
+    <string name="tv_to">To</string>
+    <string name="tv_task">Task</string>
+    <string name="tv_hour">hour</string>
+    <string name="tv_hours">hours</string>
+    <string name="tv_pomodoros">pomodoros</string>
+    <string name="tv_chart_pomodoro">Pomodoro</string>
+    <string name="tv_chart_date">Date</string>
+    <!-- Time Period -->
+    <string name="time_this_week">This week</string>
+    <string name="time_this_month">This month</string>
+    <string name="time_this_year">This year</string>
+    <string name="time_all">All</string>
+    <string name="time_custom">Custom</string>
+    <!-- Screen Settings -->
+    <string name="setting_common_minute">%s minute</string>
+    <string name="setting_common_minutes">%s minutes</string>
+    <string name="setting_common_breats">%s breats</string>
+    <string name="setting_catergory_time">Time</string>
+    <string name="setting_item_working_time">Working time</string>
+    <string name="setting_item_short_break">Short break time</string>
+    <string name="setting_item_long_break">Long break time</string>
+    <string name="setting_item_long_break_after">Long break after</string>
+
+    <!-- Common -->
+    <string name="common_alert_ok">OK</string>
+    <string name="common_alert_cancel">Cancel</string>
+    
+
+    <string-array name="all_months">
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>May</item>
+        <item>June</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>February</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

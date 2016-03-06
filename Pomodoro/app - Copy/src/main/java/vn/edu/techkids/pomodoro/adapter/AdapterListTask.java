@@ -1,0 +1,186 @@
+package vn.edu.techkids.pomodoro.adapter;
+
+import android.app.Activity;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import android.view.View.OnClickListener;
+
+import java.util.List;
+
+import vn.edu.techkids.pomodoro.R;
+import vn.edu.techkids.pomodoro.entity.Task;
+import vn.edu.techkids.pomodoro.entity.TaskManager;
+import vn.edu.techkids.pomodoro.entity.TaskStatus;
+import vn.edu.techkids.pomodoro.utils.TaskColor;
+
+/**
+ * Created by qhuydtvt on 12/10/2015.
+ */
+public abstract class AdapterListTask extends BaseAdapter {
+
+    private Activity mActivity;
+    protected TaskManager mTaskManager;
+    protected List<Task> visibileTaskList;
+
+   /* private ViewMode mViewMode;*/
+    /*private int mSelectedIndex;*/
+    private OnClickListener mOnEditMenuClickListener;
+    private AdapterView.OnItemClickListener mOnItemClickListener;
+    private CompoundButton.OnCheckedChangeListener mOnCompleteCheckBoxCheckedListener;
+
+    /* Layout */
+    private LayoutInflater mLayoutInflator;
+
+    public AdapterListTask(Activity activity, TaskManager taskManager,/* ViewMode viewMode,*/
+                           OnClickListener onEditMenuClickListener,
+                           CompoundButton.OnCheckedChangeListener onCompleteCheckBoxCheckedListener) {
+        mActivity = activity;
+        mTaskManager = taskManager;
+        mOnEditMenuClickListener = onEditMenuClickListener;
+        mOnCompleteCheckBoxCheckedListener = onCompleteCheckBoxCheckedListener;
+        mLayoutInflator = mActivity.getLayoutInflater();
+        /*mViewMode = viewMode;*/
+        visibileTaskList = getVisibleTaskList();
+    }
+
+    @Override
+    public int getCount() {
+        if (visibileTaskList == null) {
+            return 0;
+        } else { return visibileTaskList.size(); }
+    }
+
+    @Override
+    public Object getItem(int position) {
+        if (visibileTaskList == null) {
+            return null;
+        } else {
+            return visibileTaskList.get(position);
+        }
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public View getView(final int position, View convertView, ViewGroup parent) {
+        final ViewHolder viewHolder;
+
+        final Task task = visibileTaskList.get(position);
+
+        if (convertView == null) {
+            convertView = mLayoutInflator.inflate(R.layout.item_list_task, parent, false);
+
+            View vTaskColor = convertView.findViewById(R.id.v_task_color);
+            TextView tvTaskName = (TextView) convertView.findViewById(R.id.tv_task_name);
+            ImageView imvTaskEdit = (ImageView) convertView.findViewById(R.id.imv_task_menu);
+            CheckBox chbTaskComplete = (CheckBox) convertView.findViewById(R.id.chb_task_complete);
+            LinearLayout lnrContent = (LinearLayout) convertView.findViewById(R.id.lnr_item_task_content);
+
+            viewHolder = new ViewHolder(vTaskColor, tvTaskName, imvTaskEdit, chbTaskComplete, lnrContent);
+
+            convertView.setTag(viewHolder);
+            imvTaskEdit.setOnClickListener(mOnEditMenuClickListener);
+
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
+        }
+
+        viewHolder.updateView(task);
+        viewHolder.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mOnItemClickListener != null) {
+                    mOnItemClickListener.onItemClick(null, null, position, task.getId());
+                }
+            }
+        });
+
+        return convertView;
+    }
+
+    private class ViewHolder{
+
+        View vTaskColor;
+        TextView tvTaskName;
+        ImageView imvTaskEdit;
+        CheckBox chbTaskComplete;
+        LinearLayout lnrContent;
+
+        OnClickListener onClickListener;
+
+        public ViewHolder(View vTaskColor, TextView tvTaskName,
+                          ImageView imvTaskEdit, CheckBox chbTaskComplete, LinearLayout lnrContent) {
+            this.vTaskColor = vTaskColor;
+            this.tvTaskName = tvTaskName;
+            this.imvTaskEdit = imvTaskEdit;
+            this.chbTaskComplete = chbTaskComplete;
+            this.lnrContent = lnrContent;
+        }
+
+        private void updateView(Task task) {
+            TaskColor.setBackground(vTaskColor, task.getColor());
+            tvTaskName.setText(task.getName());
+            chbTaskComplete.setOnCheckedChangeListener(null); /* Remove onCheckListener to
+                                                                setChecked without sending event
+                                                                unintentionally */
+            chbTaskComplete.setChecked(task.getStatus() == TaskStatus.COMPLETE);
+            chbTaskComplete.setOnCheckedChangeListener(mOnCompleteCheckBoxCheckedListener);
+
+            lnrContent.setOnClickListener(onClickListener);
+
+            chbTaskComplete.setTag(task);
+            imvTaskEdit.setTag(task);
+        }
+
+        public void setOnClickListener(OnClickListener onClickListener) {
+            this.onClickListener = onClickListener;
+            lnrContent.setOnClickListener(onClickListener);
+        }
+    }
+
+    /*public ViewMode getViewMode() {
+        return mViewMode;
+    }
+
+    public void setViewMode(ViewMode viewMode) {
+        this.mViewMode = viewMode;
+        updateVisibleTaskList();
+    }*/
+
+    protected abstract List<Task> getVisibleTaskList();/* {*/
+        /*if(mViewMode == ViewMode.BOTH) {
+            visibileTaskList = mTaskManager.getTaskList();
+        }
+        else if(mViewMode == ViewMode.COMPLETE) {
+            visibileTaskList = mTaskManager.getTaskList(TaskStatus.COMPLETE);
+        }
+        else if(mViewMode == ViewMode.INCOMPLETE) {
+            visibileTaskList = mTaskManager.getTaskList(TaskStatus.INCOMPLETE);
+        }*/
+    /*}*/
+
+    @Override
+    public void notifyDataSetChanged() {
+        visibileTaskList =  getVisibleTaskList();
+        super.notifyDataSetChanged();
+    }
+
+    public void setOnItemClickListener(AdapterView.OnItemClickListener onItemClickListener) {
+        mOnItemClickListener = onItemClickListener;
+    }
+}
